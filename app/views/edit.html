@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Editor chữ</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 20px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      #canvas {
+        width: 900px;
+        height: 480px;
+        border: 1px solid #ccc;
+        position: relative;
+        overflow: hidden;
+      }
+      .text-item {
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        padding: 4px 6px;
+        cursor: move;
+        user-select: none;
+      }
+      .text-item.selected {
+        outline: 2px dashed #0078d4;
+      }
+      input[type="text"] {
+        padding: 6px;
+        font-size: 14px;
+      }
+      button {
+        padding: 6px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Editor: Thêm / Sửa / Xóa chữ và đổi màu</h2>
+    <div class="controls">
+      <input id="txtInput" type="text" placeholder="Nhập nội dung..." />
+      <input id="colorInput" type="color" value="#000000" title="Màu chữ" />
+      <button id="addBtn">Thêm</button>
+      <button id="updateBtn" disabled>Sửa</button>
+      <button id="deleteBtn" disabled>Xóa</button>
+      <label style="margin-left: 8px"
+        >Kích thước:
+        <select id="sizeSelect">
+          <option value="16">16px</option>
+          <option value="20">20px</option>
+          <option value="24">24px</option>
+          <option value="32">32px</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="canvas" tabindex="0" aria-label="Vùng chỉnh sửa chữ">
+      <img src="{{ url_for('serve_image', filename='banner_square.png') }}" alt="Banner nền" style="width:100%; height:100%; object-fit:contain; position:absolute; top:0; left:0; z-index:-1;">
+    </div>
+
+    <script>
+      const txtInput = document.getElementById("txtInput");
+      const colorInput = document.getElementById("colorInput");
+      const addBtn = document.getElementById("addBtn");
+      const updateBtn = document.getElementById("updateBtn");
+      const deleteBtn = document.getElementById("deleteBtn");
+      const sizeSelect = document.getElementById("sizeSelect");
+      const canvas = document.getElementById("canvas");
+
+      let selected = null;
+      let nextTop = 8;
+
+      function createTextElement(text, color, size) {
+        const el = document.createElement("div");
+        el.className = "text-item";
+        el.textContent = text || "Mẫu chữ";
+        el.style.color = color || "#000";
+        el.style.fontSize = (size || 16) + "px";
+        el.style.left = "8px";
+        el.style.top = nextTop + "px";
+        nextTop += 34;
+
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          selectItem(el);
+        });
+
+        el.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          el.contentEditable = true;
+          el.focus();
+        });
+
+        // simple drag
+        let isDragging = false,
+          startX = 0,
+          startY = 0,
+          origX = 0,
+          origY = 0;
+        el.addEventListener("mousedown", (e) => {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          origX = parseInt(el.style.left, 10) || 0;
+          origY = parseInt(el.style.top, 10) || 0;
+          document.body.style.userSelect = "none";
+        });
+        window.addEventListener("mousemove", (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          el.style.left = Math.max(0, origX + dx) + "px";
+          el.style.top = Math.max(0, origY + dy) + "px";
+        });
+        window.addEventListener("mouseup", () => {
+          if (isDragging) {
+            isDragging = false;
+            document.body.style.userSelect = "auto";
+          }
+        });
+
+        canvas.appendChild(el);
+        selectItem(el);
+        return el;
+      }
+
+      function selectItem(el) {
+        if (selected) selected.classList.remove("selected");
+        selected = el;
+        if (selected) selected.classList.add("selected");
+        updateControlsFromSelected();
+      }
+
+      function updateControlsFromSelected() {
+        if (!selected) {
+          updateBtn.disabled = true;
+          deleteBtn.disabled = true;
+          return;
+        }
+        updateBtn.disabled = false;
+        deleteBtn.disabled = false;
+        txtInput.value = selected.textContent;
+        colorInput.value = rgbToHex(getComputedStyle(selected).color);
+        const fs = parseInt(getComputedStyle(selected).fontSize, 10) || 16;
+        sizeSelect.value = fs.toString();
+      }
+
+      addBtn.addEventListener("click", () => {
+        const text = txtInput.value.trim() || "Chữ mới";
+        const color = colorInput.value;
+        const size = parseInt(sizeSelect.value, 10);
+        createTextElement(text, color, size);
+      });
+
+      updateBtn.addEventListener("click", () => {
+        if (!selected) return;
+        selected.contentEditable = false;
+        selected.textContent = txtInput.value;
+        selected.style.color = colorInput.value;
+        selected.style.fontSize = sizeSelect.value + "px";
+      });
+
+      deleteBtn.addEventListener("click", () => {
+        if (!selected) return;
+        selected.remove();
+        selected = null;
+        updateControlsFromSelected();
+      });
+
+      colorInput.addEventListener("input", () => {
+        if (selected) selected.style.color = colorInput.value;
+      });
+
+      // clicking outside deselects
+      canvas.addEventListener("click", () => {
+        if (selected) {
+          selected.classList.remove("selected");
+          selected = null;
+          updateControlsFromSelected();
+        }
+      });
+
+      // utility: convert rgb(...) to #rrggbb
+      function rgbToHex(rgb) {
+        if (!rgb) return "#000000";
+        const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (!m) return rgb;
+        return (
+          "#" +
+          [1, 2, 3]
+            .map((i) => Number(m[i]).toString(16).padStart(2, "0"))
+            .join("")
+        );
+      }
+
+      // initial sample
+      createTextElement("Xin chào — double-click để sửa", "#1a73e8", 20);
+    </script>
+  </body>
+</html>

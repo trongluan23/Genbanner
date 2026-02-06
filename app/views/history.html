@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch Sử Banner - AI Banner Generator{% endblock %}
+
+{% block extra_css %}
+<style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+        * { font-family: 'Inter', sans-serif; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-title {
+            font-size: 2.5rem; font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .banner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .banner-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .banner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        .banner-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+        .banner-info {
+            padding: 16px;
+        }
+        .banner-size {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .banner-date {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .banner-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-action {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-view {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .btn-delete {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+        }
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-icon {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Lịch Sử Banner</h1>
+            <p class="text-muted">Quản lý các banner bạn đã tạo</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if banners %}
+        <div class="banner-grid">
+            {% for banner in banners %}
+            <div class="banner-card">
+                {% if banner.image_url %}
+                    <img src="{{ banner.image_url }}" 
+                         alt="Banner {{ banner.size }}" 
+                         class="banner-thumbnail"
+                         onerror="console.error('Failed to load image:', this.src); this.onerror=null; this.parentElement.innerHTML='<div class=\'banner-thumbnail\' style=\'display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999; height: 200px;\'>No Image</div>';">
+                {% else %}
+                    <div class="banner-thumbnail" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">
+                        No Image
+                    </div>
+                {% endif %}
+                <div class="banner-info">
+                    <span class="banner-size">{{ banner.size }}</span>
+                    <div class="banner-date">
+                        <i class="bi bi-calendar"></i> {{ banner.date_created.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                    {% if banner.company_name or banner.product_name %}
+                    <div class="text-muted small mb-2">
+                        {% if banner.company_name %}<strong>{{ banner.company_name }}</strong>{% endif %}
+                        {% if banner.product_name %} - {{ banner.product_name }}{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="banner-actions">
+                        <a href="{{ url_for('banner.view_banner', banner_id=banner.id) }}" class="btn btn-action btn-view">
+                            <i class="bi bi-eye"></i> Xem
+                        </a>
+                        <form method="POST" action="{{ url_for('banner.delete_banner', banner_id=banner.id) }}" style="flex: 1;" onsubmit="return confirm('Bạn có chắc muốn xóa banner này?')">
+                            <button type="submit" class="btn btn-action btn-delete w-100">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="bi bi-image"></i></div>
+            <h3 class="text-muted">Chưa có banner nào</h3>
+            <p class="text-muted mb-4">Hãy tạo banner đầu tiên của bạn</p>
+            <a href="{{ url_for('banner.create') }}" class="btn btn-view btn-action" style="width: auto; padding: 12px 32px;">
+                <i class="bi bi-plus-circle"></i> Tạo Banner Mới
+            </a>
+        </div>
+        {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+        // Debug: Log all image URLs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.banner-thumbnail');
+            console.log('Total banner images:', images.length);
+            images.forEach((img, index) => {
+                if (img.tagName === 'IMG') {
+                    console.log(`Image ${index + 1}:`, img.src);
+                    
+                    // Add load event listener
+                    img.addEventListener('load', function() {
+                        console.log(`✅ Image ${index + 1} loaded successfully`);
+                    });
+                    
+                    // Add error event listener
+                    img.addEventListener('error', function() {
+                        console.error(`❌ Image ${index + 1} failed to load:`, img.src);
+                    });
+                }
+            });
+        });
+</script>
+{% endblock %}
