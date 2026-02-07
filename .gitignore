@@ -19,3 +19,4 @@ outputs/
 *.jpg
 *.jpeg
 node_modules/
+.kiro/
