@@ -35,10 +35,11 @@ NOTICE: NOT ADD ANY image or text into the image.
 
     image_data = result.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"preprocessed_background{size}.png", "wb") as f:
+    out_path = f"outputs/preprocessed_background{size}.png"
+    with open(out_path, "wb") as f:
         f.write(image_bytes)
-    
-    json_data['preprocessed_background'] = f"preprocessed_background{size}.png"
+
+    json_data['preprocessed_background'] = out_path
     
     return image_data
 
@@ -67,12 +68,15 @@ def gen_background_logo(json_data):
     
     image_data = result.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"preprocessed_background{size}.png", "wb") as f:
+    out_path = f"outputs/preprocessed_background{size}.png"
+    with open(out_path, "wb") as f:
         f.write(image_bytes)
-    json_data['preprocessed_background'] = f"preprocessed_background{size}.png"
+    json_data['preprocessed_background'] = out_path
     
 def resize_background(json_data,image_path):
     img = cv2.imread(image_path)
+    if img is None:
+        raise FileNotFoundError(f"Could not read image at '{image_path}'. Check the path and file permissions.")
     size = json_data['size']
     if size== "300x250":
         cv2.imwrite(f"outputs/bg_square{size}.png",img)
@@ -84,16 +88,23 @@ def resize_background(json_data,image_path):
         img = img[:,:710]
         cv2.imwrite(f"outputs/bg_portrait_top{size}.png",img[:1065,:])
         cv2.imwrite(f"outputs/bg_portrait_bottom{size}.png",img[1065:,:])
+    if size == "980x250":
+        img = img[:384,:]
+        cv2.imwrite(f"outputs/bg_wide_l{size}.png", img[:,:384])
+        cv2.imwrite(f"outputs/bg_wide_c{size}.png", img[:,384:384+576])
+        cv2.imwrite(f"outputs/bg_wide_r{size}.png", img[:,384+576:])
+        
+        
     
 
-# if __name__ == "__main__":
-#     json_data = {
-#         "size": "300x250",
-#         "background": "images/background.jpg",
-#         "logo": "images/logo_samsung.png" 
-#     }
-#     preprocess_background(json_data)
-#     resize_background(json_data, json_data['preprocessed_background'])
-#     print(json_data)
+if __name__ == "__main__":
+    json_data = {
+        "size": "660x300",
+        "background": "images/background.jpg",
+        "logo": "images/logo_samsung.png" 
+    }
+    preprocess_background(json_data)
+    resize_background(json_data, json_data['preprocessed_background'])
+    print(json_data)
 
 
