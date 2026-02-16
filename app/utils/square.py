@@ -33,15 +33,15 @@ Website: {texts['website']}
 
 """
     result = client.images.edit(
-    model="gpt-image-1",
-    image=[
-         open(f"outputs/bg_square{size}.png", "rb"),
-         open(json_data["logo"], "rb"),
-         open(json_data["product"], "rb"),
-         ],
-    prompt=prompt,
-    size="1024x1024",
-)
+        model="gpt-image-1",
+        image=open(f"outputs/bg_square{size}.png", "rb"),
+        mask=[
+            open(json_data["logo"], "rb"),
+            open(json_data["product"], "rb"),
+        ],
+        prompt=prompt,
+        size="1024x1024",
+    )
     image_data = result.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
 

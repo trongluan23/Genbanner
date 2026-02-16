@@ -29,13 +29,11 @@ def gen_portrait(json_data):
     """
 
     result1 = client.images.edit(
-    model="gpt-image-1",
-    image=[
-         open(f"outputs/bg_portrait_bottom{size}.png", "rb"),
-         ],
-    prompt=prompt1,
-    size="1536x1024",
-)
+        model="gpt-image-1",
+        image=open(f"outputs/bg_portrait_bottom{size}.png", "rb"),
+        prompt=prompt1,
+        size="1536x1024",
+    )
     image_data = result1.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open("banner_portrait_bot.png", "wb") as f:
@@ -53,15 +51,15 @@ def gen_portrait(json_data):
     """
     
     result2 = client.images.edit(
-    model="gpt-image-1",
-    image=[
-         open(f"outputs/bg_portrait_top{size}.png", "rb"),
-         open(json_data["logo"], "rb"),
-         open(json_data["product"], "rb"),
-         ],
-    prompt=prompt2,
-    size="1024x1536",
-)
+        model="gpt-image-1",
+        image=open(f"outputs/bg_portrait_top{size}.png", "rb"),
+        mask=[
+            open(json_data["logo"], "rb"),
+            open(json_data["product"], "rb"),
+        ],
+        prompt=prompt2,
+        size="1024x1536",
+    )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open("banner_portrait_top.png", "wb") as f:

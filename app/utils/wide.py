@@ -46,11 +46,11 @@ The product must be cropped out and placed in the center of the banner at a larg
 NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts. 
 """
     result2 = client.images.edit(
-            model="gpt-image-1",
-            image=[open(f"outputs/bg_wide_r{size}.png", "rb"),
-                   open(json_data["product"], "rb")],
-            prompt=prompt2,
-            size="1536x1024",
+        model="gpt-image-1",
+        image=open(f"outputs/bg_wide_r{size}.png", "rb"),
+        mask=open(json_data["product"], "rb"),
+        prompt=prompt2,
+        size="1536x1024",
     )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
@@ -69,8 +69,8 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
     """
     result3 = client.images.edit(
         model="gpt-image-1",
-        image=[open(f"outputs/bg_wide_l{size}.png", "rb"),
-               open(json_data["logo"], "rb")],
+        image=open(f"outputs/bg_wide_l{size}.png", "rb"),
+        mask=open(json_data["logo"], "rb"),
         prompt=prompt3,
         size="1024x1024", 
     )
