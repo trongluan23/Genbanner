@@ -41,7 +41,7 @@ NOTICE: NOT ADD ANY image or text into the image.
     try:
         result = client.images.edit(
             model="gpt-image-1",
-            image=[open(background_path, "rb")],
+            image=open(background_path, "rb"),
             prompt=prompt,
             size=size,
         )
@@ -85,9 +85,7 @@ def gen_background_logo(json_data):
     try:
         result = client.images.edit(
             model="gpt-image-1",
-            image=[
-                open(logo_path, "rb"),
-            ],
+            image=open(logo_path, "rb"),
             prompt=prompt,
             size=size,
         )
@@ -138,14 +136,14 @@ def resize_background(json_data, image_path):
         
     
 
-if __name__ == "__main__":
-    json_data = {
-        "size": "660x300",
-        "background": "images/background.jpg",
-        "logo": "images/logo_samsung.png" 
-    }
-    preprocess_background(json_data)
-    resize_background(json_data, json_data['preprocessed_background'])
-    print(json_data)
+# if __name__ == "__main__":
+#     json_data = {
+#         "size": "660x300",
+#         "background": "images/background.jpg",
+#         "logo": "images/logo_samsung.png" 
+#     }
+#     preprocess_background(json_data)
+#     resize_background(json_data, json_data['preprocessed_background'])
+#     print(json_data)
 
 
