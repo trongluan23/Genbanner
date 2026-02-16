@@ -219,12 +219,15 @@
         align-items: center;
         justify-content: center;
         min-height: 200px;
+        position: relative;
     }
 
     .banner-sample-image img {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: contain;
         display: block;
+        background: white;
     }
 
     .banner-placeholder {
@@ -232,6 +235,10 @@
         font-size: 1.2rem;
         text-align: center;
         padding: 40px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     /* How It Works Section */
@@ -486,10 +493,9 @@
                         <span class="banner-type-label">Medium Rectangle</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 300/250;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 300×250
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_square_350b3f8d649e495eb93a85f9a377bc93.png') }}" 
+                             alt="Banner 300x250" 
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 300×250</div>'">
                     </div>
                 </div>
             </div>
@@ -502,10 +508,9 @@
                         <span class="banner-type-label">Half Page</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 300/600;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 300×600
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_portrait_7a2cc1d9fe09437c9fb9f4d0710ce211.png') }}" 
+                             alt="Banner 300x600"
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 300×600</div>'">
                     </div>
                 </div>
             </div>
@@ -518,10 +523,9 @@
                         <span class="banner-type-label">Portrait</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 640/1280;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 640×1280
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_portrait_afcd15a10c524e54b443c412691d1a2e.png') }}" 
+                             alt="Banner 640x1280"
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 640×1280</div>'">
                     </div>
                 </div>
             </div>
@@ -534,10 +538,9 @@
                         <span class="banner-type-label">Landscape</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 640/320;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 640×320
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_landscape_faa21def63604d09a26bf7c9a186eb4a.png') }}" 
+                             alt="Banner 640x320"
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 640×320</div>'">
                     </div>
                 </div>
             </div>
@@ -550,10 +553,9 @@
                         <span class="banner-type-label">Wide Banner</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 660/300;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 660×300
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_landscape_34e7bd83eb86439aabfcb3367f2b5c39.png') }}" 
+                             alt="Banner 660x300"
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 660×300</div>'">
                     </div>
                 </div>
             </div>
@@ -566,10 +568,9 @@
                         <span class="banner-type-label">Leaderboard</span>
                     </div>
                     <div class="banner-sample-image" style="aspect-ratio: 980/250;">
-                        <div class="banner-placeholder">
-                            <i class="bi bi-image"></i><br>
-                            Banner mẫu 980×250
-                        </div>
+                        <img src="{{ url_for('serve_output', filename='banner_wide_a68be5fa.png') }}" 
+                             alt="Banner 980x250"
+                             onerror="this.parentElement.innerHTML='<div class=\'banner-placeholder\'><i class=\'bi bi-image\'></i><br>Banner mẫu 980×250</div>'">
                     </div>
                 </div>
             </div>

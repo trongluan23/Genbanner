@@ -20,7 +20,9 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = "banner.login"
+    login_manager.login_view = "auth.login"
+    login_manager.login_message = "Vui lòng đăng nhập để truy cập trang này."
+    login_manager.login_message_category = "error"
     
     # Register blueprints
     from app.controllers.banner_controller import banner_bp
@@ -57,6 +59,13 @@ def create_app():
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
+        return response
+    
+    @app.route('/outputs/<path:filename>')
+    def serve_output(filename):
+        outputs_dir = os.path.join(app.root_path, '..', 'outputs')
+        response = send_from_directory(outputs_dir, filename)
+        response.headers['Cache-Control'] = 'public, max-age=3600'
         return response
     
     return app

@@ -23,24 +23,46 @@ class BannerService:
         Returns:
             Dictionary with banner_id, generated_path, and encoded_image
         """
-        # Generate banner using utility
-        generated_path = genbanner(form_data)
-        
-        if not generated_path or not os.path.exists(generated_path):
+        try:
+            print(f"Creating banner for user {user_id}")
+            print(f"Form data: {form_data}")
+            print(f"File paths: {file_paths}")
+            
+            # Generate banner using utility
+            generated_path = genbanner(form_data)
+            
+            if not generated_path:
+                print("Banner generation returned None")
+                return None
+                
+            if not os.path.exists(generated_path):
+                print(f"Generated banner file not found: {generated_path}")
+                return None
+            
+            print(f"Banner generated at: {generated_path}")
+            
+            # Save to database
+            banner_id = self._save_to_database(user_id, form_data, file_paths, generated_path)
+            
+            if not banner_id:
+                print("Failed to save banner to database")
+                return None
+            
+            # Encode image
+            with open(generated_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+            
+            return {
+                'banner_id': banner_id,
+                'generated_path': generated_path,
+                'encoded_image': encoded_string
+            }
+            
+        except Exception as e:
+            print(f"Error in create_banner: {e}")
+            import traceback
+            traceback.print_exc()
             return None
-        
-        # Save to database
-        banner_id = self._save_to_database(user_id, form_data, file_paths, generated_path)
-        
-        # Encode image
-        with open(generated_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-        
-        return {
-            'banner_id': banner_id,
-            'generated_path': generated_path,
-            'encoded_image': encoded_string
-        }
     
     def _save_to_database(self, user_id, form_data, file_paths, generated_path):
         """Save banner to database"""
