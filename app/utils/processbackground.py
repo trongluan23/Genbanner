@@ -7,8 +7,9 @@ from app.utils.openai_client import client
 
 def preprocess_background(json_data):
     """Preprocess background image using OpenAI API"""
+    from app.config.settings import Config
     # Ensure outputs directory exists
-    os.makedirs('outputs', exist_ok=True)
+    os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
     
     has_bg = bool(json_data.get('background'))
     if not has_bg:
@@ -46,9 +47,10 @@ NOTICE: NOT ADD ANY image or text into the image.
             size=size,
         )
 
+        from app.config.settings import Config
         image_data = result.data[0].b64_json
         image_bytes = base64.b64decode(image_data)
-        out_path = f"outputs/preprocessed_background{size}.png"
+        out_path = os.path.join(Config.OUTPUTS_FOLDER, f"preprocessed_background{size}.png")
         with open(out_path, "wb") as f:
             f.write(image_bytes)
 
@@ -90,9 +92,10 @@ def gen_background_logo(json_data):
             size=size,
         )
         
+        from app.config.settings import Config
         image_data = result.data[0].b64_json
         image_bytes = base64.b64decode(image_data)
-        out_path = f"outputs/preprocessed_background{size}.png"
+        out_path = os.path.join(Config.OUTPUTS_FOLDER, f"preprocessed_background{size}.png")
         with open(out_path, "wb") as f:
             f.write(image_bytes)
         json_data['preprocessed_background'] = out_path
@@ -103,31 +106,33 @@ def gen_background_logo(json_data):
     
 def resize_background(json_data, image_path):
     """Resize and split background image for banner composition"""
+    from app.config.settings import Config
     # Ensure outputs directory exists
-    os.makedirs('outputs', exist_ok=True)
+    os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
     
     print(f"Resizing background: {image_path}")
     img = cv2.imread(image_path)
     if img is None:
         raise FileNotFoundError(f"Could not read image at '{image_path}'. Check the path and file permissions.")
     
+    from app.config.settings import Config
     size = json_data['size']
     try:
         if size == "300x250":
-            cv2.imwrite(f"outputs/bg_square{size}.png", img)
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_square{size}.png"), img)
         if size in ["640x320", "660x300"]:
             img = img[:768, :]
-            cv2.imwrite(f"outputs/bg_landscape_l{size}.png", img[:, :768])
-            cv2.imwrite(f"outputs/bg_landscape_r{size}.png", img[:, 768:])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_l{size}.png"), img[:, :768])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_r{size}.png"), img[:, 768:])
         if size in ["300x600", "640x1280"]:
             img = img[:, :710]
-            cv2.imwrite(f"outputs/bg_portrait_top{size}.png", img[:1065, :])
-            cv2.imwrite(f"outputs/bg_portrait_bottom{size}.png", img[1065:, :])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_portrait_top{size}.png"), img[:1065, :])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_portrait_bottom{size}.png"), img[1065:, :])
         if size == "980x250":
             img = img[:384, :]
-            cv2.imwrite(f"outputs/bg_wide_l{size}.png", img[:, :384])
-            cv2.imwrite(f"outputs/bg_wide_c{size}.png", img[:, 384:384+576])
-            cv2.imwrite(f"outputs/bg_wide_r{size}.png", img[:, 384+576:])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_l{size}.png"), img[:, :384])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_c{size}.png"), img[:, 384:384+576])
+            cv2.imwrite(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_r{size}.png"), img[:, 384+576:])
         print(f"Background resized successfully for size: {size}")
     except Exception as e:
         print(f"Error resizing background: {e}")

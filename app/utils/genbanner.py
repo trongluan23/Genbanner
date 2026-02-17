@@ -13,8 +13,9 @@ def genbanner(json_data):
         Path to generated banner or None if failed
     """
     try:
+        from app.config.settings import Config
         # Ensure outputs directory exists
-        os.makedirs('outputs', exist_ok=True)
+        os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
         
         print(f"Generating banner with size: {json_data.get('size')}")
         

@@ -7,6 +7,8 @@ import shutil
 from app.utils.openai_client import client
 
 def gen_wide(json_data):
+    from app.config.settings import Config
+    
     size = json_data["size"]
     texts = {
         "product_name": json_data.get("product_name"),
@@ -31,13 +33,13 @@ def gen_wide(json_data):
     """
     result1 = client.images.edit(
         model="gpt-image-1",
-        image=open(f"outputs/bg_wide_c{size}.png", "rb"),
+        image=open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_c{size}.png"), "rb"),
         prompt=prompt1,
         size="1536x1024",
     )
     image_data = result1.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"outputs/banner_wide_c{size}.png", "wb") as f:
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_c{size}.png"), "wb") as f:
         f.write(image_bytes)
         
     ##Generate right part with product
@@ -47,14 +49,14 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
 """
     result2 = client.images.edit(
         model="gpt-image-1",
-        image=open(f"outputs/bg_wide_r{size}.png", "rb"),
+        image=open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_r{size}.png"), "rb"),
         mask=open(json_data["product"], "rb"),
         prompt=prompt2,
         size="1536x1024",
     )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"outputs/banner_wide_r{size}.png", "wb") as f:
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_r{size}.png"), "wb") as f:
         f.write(image_bytes)
         
     prompt3 = f"""
@@ -69,21 +71,21 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
     """
     result3 = client.images.edit(
         model="gpt-image-1",
-        image=open(f"outputs/bg_wide_l{size}.png", "rb"),
-        mask=open(json_data["logo"], "rb"),
+        image=[open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_l{size}.png"), "rb"),
+               open(json_data["logo"], "rb")],
         prompt=prompt3,
         size="1024x1024", 
     )
     image_data = result3.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"outputs/banner_wide_l{size}.png", "wb") as f:
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_l{size}.png"), "wb") as f:
         f.write(image_bytes)
         
-    img_left = cv2.imread(f"outputs/banner_wide_l{size}.png")
-    img_center = cv2.imread(f"outputs/banner_wide_c{size}.png")
-    img_right = cv2.imread(f"outputs/banner_wide_r{size}.png")
+    img_left = cv2.imread(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_l{size}.png"))
+    img_center = cv2.imread(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_c{size}.png"))
+    img_right = cv2.imread(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_r{size}.png"))
     img = cv2.hconcat([img_left, img_center, img_right])
-    out_path = f"outputs/banner_wide_{str(uuid.uuid4())[:8]}.png"
+    out_path = os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_{str(uuid.uuid4())[:8]}.png")
     cv2.imwrite(out_path, img)
     
     

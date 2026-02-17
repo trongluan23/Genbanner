@@ -17,6 +17,10 @@ def create_app():
     from app.config.settings import Config
     app.config.from_object(Config)
     
+    # Ensure required directories exist
+    os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+    os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
+    
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
@@ -54,8 +58,7 @@ def create_app():
     
     @app.route('/images/<path:filename>')
     def serve_image(filename):
-        images_dir = os.path.join(app.root_path, '..', 'images')
-        response = send_from_directory(images_dir, filename)
+        response = send_from_directory(Config.UPLOAD_FOLDER, filename)
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
@@ -63,8 +66,7 @@ def create_app():
     
     @app.route('/outputs/<path:filename>')
     def serve_output(filename):
-        outputs_dir = os.path.join(app.root_path, '..', 'outputs')
-        response = send_from_directory(outputs_dir, filename)
+        response = send_from_directory(Config.OUTPUTS_FOLDER, filename)
         response.headers['Cache-Control'] = 'public, max-age=3600'
         return response
     

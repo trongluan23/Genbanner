@@ -10,9 +10,10 @@ class FileService:
     """Service for file operations"""
     
     def __init__(self, user_id):
+        from app.config.settings import Config
         self.user_id = user_id
         # Ensure base images directory exists
-        base_images_dir = os.path.join(os.getcwd(), "images")
+        base_images_dir = Config.UPLOAD_FOLDER
         os.makedirs(base_images_dir, exist_ok=True)
         
         self.user_folder = os.path.join(base_images_dir, f"user_{user_id}")

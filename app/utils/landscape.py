@@ -8,6 +8,8 @@ from app.utils.openai_client import client
 
 
 def gen_lanscape(json_data):
+    from app.config.settings import Config
+    
     size = json_data["size"]
     texts = {
         "product_name": json_data.get("product_name"),
@@ -25,14 +27,14 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
 
     result1 = client.images.edit(
         model="gpt-image-1",
-        image=open(f"outputs/bg_landscape_r{size}.png", "rb"),
+        image=open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_r{size}.png"), "rb"),
         mask=open(json_data["product"], "rb"),
         prompt=prompt1,
         size="1024x1024",
     )
     image_data = result1.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"outputs/banner_landscape_r{size}.png", "wb") as f:
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_r{size}.png"), "wb") as f:
         f.write(image_bytes)
     
     prompt2 = f"""
@@ -52,24 +54,26 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
     """
     
     result2 = client.images.edit(
-        model="gpt-image-1",
-        image=open(f"outputs/bg_landscape_l{size}.png", "rb"),
-        mask=open(json_data["logo"], "rb"),
-        prompt=prompt2,
-        size="1024x1024",
-    )
+    model="gpt-image-1",
+    image=[
+         open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_l{size}.png"), "rb"),
+         open(json_data["logo"], "rb"),
+         ],
+    prompt=prompt2,
+    size="1024x1024",
+)
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
-    with open(f"outputs/banner_landscape_l{size}.png", "wb") as f:
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_l{size}.png"), "wb") as f:
         f.write(image_bytes)
         
-    img_left = cv2.imread(f"outputs/banner_landscape_l{size}.png")
-    img_right = cv2.imread(f"outputs/banner_landscape_r{size}.png")
+    img_left = cv2.imread(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_l{size}.png"))
+    img_right = cv2.imread(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_r{size}.png"))
     if img_left is None or img_right is None:
         raise FileNotFoundError("Không tìm thấy file ảnh hoặc file bị lỗi!")
     
     img = cv2.hconcat([img_left, img_right])
-    out_path = f"outputs/banner_landscape_{uuid.uuid4().hex}.png"
+    out_path = os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_{uuid.uuid4().hex}.png")
     cv2.imwrite(out_path, img)
     
     return out_path

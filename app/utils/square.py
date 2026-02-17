@@ -32,21 +32,23 @@ Khuyến mãi: {texts['discount']}
 Website: {texts['website']}
 
 """
+    from app.config.settings import Config
+    
     result = client.images.edit(
-        model="gpt-image-1",
-        image=open(f"outputs/bg_square{size}.png", "rb"),
-        mask=[
-            open(json_data["logo"], "rb"),
-            open(json_data["product"], "rb"),
-        ],
-        prompt=prompt,
-        size="1024x1024",
-    )
+    model="gpt-image-1",
+    image=[
+         open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_square{size}.png"), "rb"),
+         open(json_data["logo"], "rb"),
+         open(json_data["product"], "rb"),
+         ],
+    prompt=prompt,
+    size="1024x1024",
+)
     image_data = result.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
 
-    os.makedirs("outputs", exist_ok=True)
-    out_path = os.path.join("outputs", f"banner_square_{uuid.uuid4().hex}.png")
+    os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
+    out_path = os.path.join(Config.OUTPUTS_FOLDER, f"banner_square_{uuid.uuid4().hex}.png")
     with open(out_path, "wb") as f:
         f.write(image_bytes)
 

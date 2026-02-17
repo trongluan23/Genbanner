@@ -8,6 +8,9 @@ load_dotenv()
 
 class Config:
     """Base configuration"""
+    # Get base directory (project root)
+    BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    
     SECRET_KEY = os.environ.get("SECRET_KEY", "hi")
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
@@ -17,7 +20,8 @@ class Config:
     
     # Upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), "images")
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "images")
+    OUTPUTS_FOLDER = os.path.join(BASE_DIR, "outputs")
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 class DevelopmentConfig(Config):
