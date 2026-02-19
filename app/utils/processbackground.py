@@ -8,8 +8,14 @@ from app.utils.openai_client import client
 def preprocess_background(json_data):
     """Preprocess background image using OpenAI API"""
     from app.config.settings import Config
-    # Ensure outputs directory exists
+    # Ensure outputs directory exists with proper permissions
     os.makedirs(Config.OUTPUTS_FOLDER, exist_ok=True)
+    
+    # Set directory permissions (important for server environments)
+    try:
+        os.chmod(Config.OUTPUTS_FOLDER, 0o755)
+    except Exception as e:
+        print(f"Warning: Could not set permissions on outputs folder: {e}")
     
     has_bg = bool(json_data.get('background'))
     if not has_bg:
@@ -39,13 +45,23 @@ NOTICE: NOT ADD ANY image or text into the image.
     
     print(f"Processing background: {background_path}")
     
+    # Verify file exists and is readable
+    if not os.path.isfile(background_path):
+        raise FileNotFoundError(f"Background file does not exist: {background_path}")
+    
+    # Check file size
+    file_size = os.path.getsize(background_path)
+    print(f"Background file size: {file_size} bytes")
+    
     try:
-        result = client.images.edit(
-            model="gpt-image-1",
-            image=open(background_path, "rb"),
-            prompt=prompt,
-            size=size,
-        )
+        # Open file properly with context manager
+        with open(background_path, "rb") as image_file:
+            result = client.images.edit(
+                model="gpt-image-1",
+                image=image_file,
+                prompt=prompt,
+                size=size,
+            )
 
         from app.config.settings import Config
         image_data = result.data[0].b64_json
@@ -84,13 +100,23 @@ def gen_background_logo(json_data):
     
     print(f"Generating background from logo: {logo_path}")
     
+    # Verify file exists and is readable
+    if not os.path.isfile(logo_path):
+        raise FileNotFoundError(f"Logo file does not exist: {logo_path}")
+    
+    # Check file size
+    file_size = os.path.getsize(logo_path)
+    print(f"Logo file size: {file_size} bytes")
+    
     try:
-        result = client.images.edit(
-            model="gpt-image-1",
-            image=open(logo_path, "rb"),
-            prompt=prompt,
-            size=size,
-        )
+        # Open file properly with context manager
+        with open(logo_path, "rb") as image_file:
+            result = client.images.edit(
+                model="gpt-image-1",
+                image=image_file,
+                prompt=prompt,
+                size=size,
+            )
         
         from app.config.settings import Config
         image_data = result.data[0].b64_json

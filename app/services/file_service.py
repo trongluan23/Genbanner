@@ -64,11 +64,22 @@ class FileService:
             out_name = f"{name_prefix}_{timestamp}{ext or '.jpg'}"
             out_path = os.path.join(self.user_folder, out_name)
             file_obj.save(out_path)
-            print(f"File saved: {out_path}")
+            
+            # Set file permissions to be readable (important for server environments)
+            os.chmod(out_path, 0o644)
+            
+            # Verify file was saved and is readable
+            if not os.path.exists(out_path):
+                raise Exception(f"File was not saved successfully: {out_path}")
+            
+            file_size = os.path.getsize(out_path)
+            print(f"File saved: {out_path} (size: {file_size} bytes)")
             
             return out_path
         except Exception as e:
             print(f"Error saving file {name_prefix}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def cleanup_banner_files(self, banner):
