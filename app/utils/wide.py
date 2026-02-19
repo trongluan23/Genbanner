@@ -47,13 +47,15 @@ def gen_wide(json_data):
 The product must be cropped out and placed in the center of the banner at a large size. 
 NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts. 
 """
-    result2 = client.images.edit(
-        model="gpt-image-1",
-        image=open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_r{size}.png"), "rb"),
-        mask=open(json_data["product"], "rb"),
-        prompt=prompt2,
-        size="1536x1024",
-    )
+    # Use multiple images instead of mask to avoid size mismatch
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_r{size}.png"), "rb") as bg_file, \
+         open(json_data["product"], "rb") as product_file:
+        result2 = client.images.edit(
+            model="gpt-image-1",
+            image=[bg_file, product_file],
+            prompt=prompt2,
+            size="1536x1024",
+        )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_r{size}.png"), "wb") as f:
@@ -69,13 +71,15 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
     The texts to be added are:
     Product name: {texts['product_name']}
     """
-    result3 = client.images.edit(
-        model="gpt-image-1",
-        image=[open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_l{size}.png"), "rb"),
-               open(json_data["logo"], "rb")],
-        prompt=prompt3,
-        size="1024x1024", 
-    )
+    # Use context manager for proper file handling
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_wide_l{size}.png"), "rb") as bg_file, \
+         open(json_data["logo"], "rb") as logo_file:
+        result3 = client.images.edit(
+            model="gpt-image-1",
+            image=[bg_file, logo_file],
+            prompt=prompt3,
+            size="1024x1024", 
+        )
     image_data = result3.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_wide_l{size}.png"), "wb") as f:

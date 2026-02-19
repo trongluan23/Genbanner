@@ -25,13 +25,15 @@ The product must be cropped out and placed in the center of the banner at a larg
 NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts. 
 """
 
-    result1 = client.images.edit(
-        model="gpt-image-1",
-        image=open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_r{size}.png"), "rb"),
-        mask=open(json_data["product"], "rb"),
-        prompt=prompt1,
-        size="1024x1024",
-    )
+    # Use multiple images instead of mask to avoid size mismatch
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_r{size}.png"), "rb") as bg_file, \
+         open(json_data["product"], "rb") as product_file:
+        result1 = client.images.edit(
+            model="gpt-image-1",
+            image=[bg_file, product_file],
+            prompt=prompt1,
+            size="1024x1024",
+        )
     image_data = result1.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_r{size}.png"), "wb") as f:
@@ -53,15 +55,15 @@ NOTICE: NOT CHANGE COLOR of the background and NOT ADD ANY new images or texts.
     Website: {texts['website']}
     """
     
-    result2 = client.images.edit(
-    model="gpt-image-1",
-    image=[
-         open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_l{size}.png"), "rb"),
-         open(json_data["logo"], "rb"),
-         ],
-    prompt=prompt2,
-    size="1024x1024",
-)
+    # Use context manager for proper file handling
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_landscape_l{size}.png"), "rb") as bg_file, \
+         open(json_data["logo"], "rb") as logo_file:
+        result2 = client.images.edit(
+            model="gpt-image-1",
+            image=[bg_file, logo_file],
+            prompt=prompt2,
+            size="1024x1024",
+        )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     with open(os.path.join(Config.OUTPUTS_FOLDER, f"banner_landscape_l{size}.png"), "wb") as f:

@@ -53,16 +53,16 @@ def gen_portrait(json_data):
     Tên sản phẩm: {texts['product_name']}
     """
     
-    result2 = client.images.edit(
-    model="gpt-image-1",
-    image=[
-         open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_portrait_top{size}.png"), "rb"),
-         open(json_data["logo"], "rb"),
-         open(json_data["product"], "rb"),
-         ],
-    prompt=prompt2,
-    size="1024x1536",
-)
+    # Use context manager for proper file handling
+    with open(os.path.join(Config.OUTPUTS_FOLDER, f"bg_portrait_top{size}.png"), "rb") as bg_file, \
+         open(json_data["logo"], "rb") as logo_file, \
+         open(json_data["product"], "rb") as product_file:
+        result2 = client.images.edit(
+            model="gpt-image-1",
+            image=[bg_file, logo_file, product_file],
+            prompt=prompt2,
+            size="1024x1536",
+        )
     image_data = result2.data[0].b64_json
     image_bytes = base64.b64decode(image_data)
     temp_top_path = os.path.join(Config.OUTPUTS_FOLDER, "banner_portrait_top_temp.png")
